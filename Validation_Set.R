@@ -56,7 +56,7 @@ train_control <- trainControl(method = "cv",
                               savePredictions = TRUE, 
                               classProbs = F)
 
-five_gene_seen <- assays_averaged[!assays_averaged$group %in% c("DV_COVID", "Non-Sterile DB", "CONTROL"),]
+five_gene_seen <- assays_averaged[!assays_averaged$group %in% c("DV_COVID", "CONTROL"),]
 
 # train the model
 model <- train(as.factor(MISC) ~ .,
@@ -73,12 +73,12 @@ mod_coefficients <- mod_coefficients[2:length(mod_coefficients)]
 assays_averaged$DRS <- as.vector(as.matrix(assays_averaged[,match(names(mod_coefficients), 
                                                                           colnames(assays_averaged))]) %*% as.matrix(mod_coefficients))
 
-roc_seen_cv_coef <- roc(assays_averaged$MISC[!assays_averaged$group %in% c("DV_COVID", "Non-Sterile DB", "CONTROL")], 
-                        assays_averaged$DRS[!assays_averaged$group %in% c("DV_COVID", "Non-Sterile DB", "CONTROL")], 
+roc_seen_cv_coef <- roc(assays_averaged$MISC[!assays_averaged$group %in% c("DV_COVID",  "CONTROL")], 
+                        assays_averaged$DRS[!assays_averaged$group %in% c("DV_COVID",  "CONTROL")], 
                         ci = T)
 
-roc_db_cv_coef <- roc(assays_averaged$MISC[assays_averaged$group %in% c("Full Mis-C Criteria", "DEFINITE BACTERIAL")], 
-                      assays_averaged$DRS[assays_averaged$group %in% c("Full Mis-C Criteria", "DEFINITE BACTERIAL")], 
+roc_db_cv_coef <- roc(assays_averaged$MISC[assays_averaged$group %in% c("Full Mis-C Criteria", "DEFINITE BACTERIAL", "Non-Sterile DB")], 
+                      assays_averaged$DRS[assays_averaged$group %in% c("Full Mis-C Criteria", "DEFINITE BACTERIAL", "Non-Sterile DB")], 
                       ci = T)
 
 roc_dv_cv_coef <- roc(assays_averaged$MISC[assays_averaged$group %in% c("Full Mis-C Criteria", "DEFINITE VIRAL")], 
@@ -93,8 +93,8 @@ roc_all_seen_unseen_cv_coef <- roc(assays_averaged$MISC[!assays_averaged$group =
                                    assays_averaged$DRS[!assays_averaged$group == "CONTROL"], 
                                    ci = T)
 
-roc_all_unseen_cv_coef <- roc(assays_averaged$MISC[assays_averaged$group %in% c("DV_COVID", "Non-Sterile DB", "Full Mis-C Criteria")], 
-                              assays_averaged$DRS[assays_averaged$group %in% c("DV_COVID", "Non-Sterile DB", "Full Mis-C Criteria")], 
+roc_all_unseen_cv_coef <- roc(assays_averaged$MISC[assays_averaged$group %in% c("DV_COVID",  "Full Mis-C Criteria")], 
+                              assays_averaged$DRS[assays_averaged$group %in% c("DV_COVID",  "Full Mis-C Criteria")], 
                               ci = T)
 
 roc_covid_cv_coef <- roc(assays_averaged$MISC[assays_averaged$group %in% c("DV_COVID", "Full Mis-C Criteria")], 
@@ -130,7 +130,6 @@ assays_averaged$group[assays_averaged$group == 'DEFINITE BACTERIAL'] <- 'Bacteri
 assays_averaged$group[assays_averaged$group == 'DEFINITE VIRAL'] <- 'Viral'
 assays_averaged$group[assays_averaged$group == 'KAWASAKI DISEASE'] <- 'KD'
 assays_averaged$group[assays_averaged$group == 'DV_COVID'] <- 'COVID-19'
-assays_averaged$group[assays_averaged$group == 'Non-Sterile DB'] <- 'Non-sterile bacterial'
 assays_averaged$group[assays_averaged$group == 'Full Mis-C Criteria'] <- 'MIS-C'
 
 assays_averaged$group <- fct_relevel(assays_averaged$group, 
@@ -138,15 +137,13 @@ assays_averaged$group <- fct_relevel(assays_averaged$group,
                                          "KD", 
                                          "Viral", 
                                          "Bacterial", 
-                                         "Non-sterile bacterial", 
                                          "COVID-19")
 
 colkey = c("MIS-C" = '#9310B9', 
            "Viral" = '#46ACFF', 
            "KD" = '#FDE725', 
            "Bacterial" = '#FF022A', 
-           "COVID-19" = '#00008b', 
-           'Non-sterile bacterial' = "orange")
+           "COVID-19" = '#00008b')
 
 DRS_plot <- ggplot(assays_averaged[assays_averaged$group != "CONTROL",], aes(x = group, 
                                                                                      y = DRS, 
